@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { UsuarioModule } from './usuario/usuario.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { ProyectoModule } from './proyecto/proyecto.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     PrismaModule,
     UsuarioModule,
     AuthModule,
+    ProyectoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

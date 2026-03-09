@@ -7,12 +7,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Empresa {
+  id            Int       @id @default(autoincrement())
+  nombre        String
+  rut           String    @unique
+  fechaCreacion DateTime  @default(now())
+
+  usuarios      Usuario[]
+  proyectos     Proyecto[]
+  proveedores   Proveedor[]
+  categorias    Categoria[]
+}
+
+
 model Usuario {
   id        Int      @id @default(autoincrement())
   nombre    String
   email     String   @unique
   password  String
   role      String   @default("user")
+  
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+  
   createdAt DateTime @default(now())
 }
+
+model Proyecto {
+  id Int @id @default(autoincrement())
+  nombre String
+  empresaId Int
+  empresa Empresa @relation(fields: [empresaId], references: [id])
+}
+
+model Proveedor {
+  id Int @id @default(autoincrement())
+  nombre    String
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+}
+
+model Categoria {
+  id Int @id @default(autoincrement())
+  nombre    String
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+}
+
+
+
+
 

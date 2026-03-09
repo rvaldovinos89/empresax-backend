@@ -23,6 +23,7 @@ export class UsuarioService {
       data: {
         ...createUsuarioDto,
         password: hashedPassword,
+		empresaId: 1,
       },
     });
 
