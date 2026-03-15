@@ -36,6 +36,7 @@ model Usuario {
 model Proyecto {
   id Int @id @default(autoincrement())
   nombre String
+  estado String @default("abierto")
   empresaId Int
   empresa Empresa @relation(fields: [empresaId], references: [id])
 }

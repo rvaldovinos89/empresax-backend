@@ -1,16 +1,25 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateProyectoDto } from './dto/create-proyecto.dto';
 
 @Controller('proyectos')
 export class ProyectoController {
 
   constructor(private readonly proyectoService: ProyectoService) {}
-
+  
+  @UseGuards(JwtAuthGuard)
   @Post()
   async crearProyecto(
-    @Body() body: { nombre: string; empresaId: number },
+    @Body() body: CreateProyectoDto,
+    @Request() req,
   ) {
-    return this.proyectoService.crearProyecto(body);
+    const empresaId = req.user.empresaId;
+
+    return this.proyectoService.crearProyecto({
+      ...body,
+      empresaId,
+    });
   }
   
   @Get()
