@@ -39,6 +39,10 @@ model Proyecto {
   estado String @default("abierto")
   empresaId Int
   empresa Empresa @relation(fields: [empresaId], references: [id])
+  presupuesto Float?
+  precioVenta Float?
+  compras Compra[]
+
 }
 
 model Proveedor {
@@ -54,6 +58,16 @@ model Categoria {
   empresaId Int
   empresa   Empresa @relation(fields: [empresaId], references: [id])
 }
+
+model Compra {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  monto      Float
+  proyecto   Proyecto @relation(fields: [proyectoId], references: [id])
+  proyectoId Int
+  createdAt  DateTime @default(now())
+}
+
 
 
 

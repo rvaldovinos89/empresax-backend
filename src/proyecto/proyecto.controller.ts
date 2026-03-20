@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, Param } from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
@@ -25,6 +25,11 @@ export class ProyectoController {
   @Get()
   async listarProyectos() {
     return this.proyectoService.listarProyectos();
+  }
+  
+  @Get(':id/margen')
+  obtenerMargen(@Param('id') id: string) {
+    return this.proyectoService.obtenerMargen(Number(id));
   }
 
 }

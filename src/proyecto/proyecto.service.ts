@@ -10,12 +10,19 @@ export class ProyectoService {
   async crearProyecto(data: {
     nombre: string;
     empresaId: number;
+	presupuesto?: number;
+	precioVenta?: number;
   }) {
 
     try {
 
       const proyecto = await this.prisma.proyecto.create({
-        data,
+        data:{
+			nombre: data.nombre,
+			empresaId: data.empresaId,
+			presupuesto: data.presupuesto,
+			precioVenta: data.precioVenta,
+		},
       });
 
       return proyecto;
@@ -47,5 +54,52 @@ export class ProyectoService {
     }
 
   }
+  
+  async obtenerMargen(proyectoId: number) {
+
+  try {
+
+    const proyecto = await this.prisma.proyecto.findUnique({
+      where: { id: proyectoId },
+    });
+
+    if (!proyecto) {
+      throw new HttpException(
+        'Proyecto no encontrado',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const resultado = await this.prisma.compra.aggregate({
+      where: { proyectoId },
+      _sum: {
+        monto: true,
+      },
+    });
+
+    const costoTotal = resultado._sum.monto || 0;
+    const precioVenta = proyecto.precioVenta || 0;
+
+    return {
+      proyectoId,
+      costoTotal,
+      precioVenta,
+      margen: precioVenta - costoTotal,
+    };
+
+  } catch (error) {
+
+    if (error instanceof HttpException) {
+      throw error;
+    }
+
+    throw new HttpException(
+      'Error al calcular margen',
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+
+  }
+
+}
 
 }

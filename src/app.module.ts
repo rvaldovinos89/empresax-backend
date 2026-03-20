@@ -6,6 +6,9 @@ import { UsuarioModule } from './usuario/usuario.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ProyectoModule } from './proyecto/proyecto.module';
+import { CompraModule } from './compra/compra.module';
+
+
 
 @Module({
   imports: [
@@ -16,6 +19,7 @@ import { ProyectoModule } from './proyecto/proyecto.module';
     UsuarioModule,
     AuthModule,
     ProyectoModule,
+	CompraModule,
   ],
   controllers: [AppController],
   providers: [AppService],
