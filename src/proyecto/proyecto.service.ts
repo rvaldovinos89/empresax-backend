@@ -1,11 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import { 
+Injectable,
+HttpException,
+HttpStatus,
+NotFoundException,
+ConflictException, 
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
+
 
 @Injectable()
 export class ProyectoService {
 
   constructor(private prisma: PrismaService) {}
+
+   private async buscarProyectoPorId(id: number) {
+    const proyecto = await this.prisma.proyecto.findUnique({
+      where: { id },
+    });
+
+    if (!proyecto) {
+      throw new NotFoundException('Proyecto no encontrado');
+    }
+
+    return proyecto;
+  }
 
   async crearProyecto(data: {
     nombre: string;
@@ -55,11 +73,51 @@ export class ProyectoService {
 
   }
   
-  async obtenerMargen(proyectoId: number) {
+   async actualizarProyecto(
+    proyectoId: number,
+    data: {
+      nombre?: string;
+      presupuesto?: number;
+      precioVenta?: number;
+    },
+  ) {
+    try {
+      const proyecto = await this.buscarProyectoPorId(proyectoId);
 
-  try {
+      if (proyecto.estado?.toLowerCase() === 'cerrado') {
+        throw new ConflictException(
+          'El proyecto está cerrado y no permite edición',
+        );
+      }
 
-    const proyecto = await this.prisma.proyecto.findUnique({
+      return await this.prisma.proyecto.update({
+        where: { id: proyectoId },
+        data: {
+          nombre: data.nombre,
+          presupuesto: data.presupuesto,
+          precioVenta: data.precioVenta,
+        },
+      });
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Error al actualizar el proyecto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  
+   async obtenerMargen(proyectoId: number) {
+
+    try {
+
+     const proyecto = await this.prisma.proyecto.findUnique({
       where: { id: proyectoId },
     });
 

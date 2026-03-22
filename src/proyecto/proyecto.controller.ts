@@ -1,7 +1,17 @@
-import { Controller, Post, Body, Get, UseGuards, Request, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Request,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { ProyectoService } from './proyecto.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
+import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 
 @Controller('proyectos')
 export class ProyectoController {
@@ -25,6 +35,15 @@ export class ProyectoController {
   @Get()
   async listarProyectos() {
     return this.proyectoService.listarProyectos();
+  }
+  
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async actualizarProyecto(
+    @Param('id') id: string,
+    @Body() body: UpdateProyectoDto,
+  ) {
+    return this.proyectoService.actualizarProyecto(Number(id), body);
   }
   
   @Get(':id/margen')
