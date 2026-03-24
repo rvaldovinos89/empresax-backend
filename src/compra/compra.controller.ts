@@ -18,7 +18,7 @@ export class CompraController {
   }
   
   @Get('proyecto/:id/costo-total')
-  btenerCostoTotal(@Param('id') id: string) {
+  otenerCostoTotal(@Param('id') id: string) {
    return this.compraService.obtenerCostoTotal(Number(id));
   }
 
