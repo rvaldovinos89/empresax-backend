@@ -160,4 +160,54 @@ export class ProyectoService {
 
 }
 
+   async obtenerResumenProyecto(proyectoId: number) {
+    try {
+      const proyecto = await this.buscarProyectoPorId(proyectoId);
+
+      const resultado = await this.prisma.compra.aggregate({
+        where: { proyectoId },
+        _sum: {
+          monto: true,
+        },
+      });
+
+      const costoTotal = resultado._sum.monto || 0;
+      const presupuesto = proyecto.presupuesto ?? 0;
+      const precioVenta = proyecto.precioVenta ?? null;
+
+      const saldoDisponible = presupuesto - costoTotal;
+
+      const porcentajeConsumido =
+        presupuesto > 0 ? (costoTotal / presupuesto) * 100 : null;
+
+      const margen =
+        precioVenta && precioVenta > 0 ? precioVenta - costoTotal : null;
+
+      const margenPorcentaje =
+        precioVenta && precioVenta > 0
+          ? ((precioVenta - costoTotal) / precioVenta) * 100
+          : null;
+
+      return {
+        proyectoId: proyecto.id,
+        presupuesto,
+        precioVenta,
+        costoTotal,
+        saldoDisponible,
+        porcentajeConsumido,
+        margen,
+        margenPorcentaje,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new HttpException(
+        'Error al obtener resumen del proyecto',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
 }

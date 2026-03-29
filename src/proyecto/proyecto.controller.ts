@@ -46,6 +46,12 @@ export class ProyectoController {
     return this.proyectoService.actualizarProyecto(Number(id), body);
   }
   
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/resumen')
+  obtenerResumen(@Param('id') id: string) {
+    return this.proyectoService.obtenerResumenProyecto(Number(id));
+  }
+  
   @Get(':id/margen')
   obtenerMargen(@Param('id') id: string) {
     return this.proyectoService.obtenerMargen(Number(id));
