@@ -177,27 +177,63 @@ export class ProyectoService {
 
       const saldoDisponible = presupuesto - costoTotal;
 
-      const porcentajeConsumido =
+      const porcentajeConsumidoRaw =
         presupuesto > 0 ? (costoTotal / presupuesto) * 100 : null;
 
       const margen =
         precioVenta && precioVenta > 0 ? precioVenta - costoTotal : null;
 
-      const margenPorcentaje =
+      const margenPorcentajeRaw =
         precioVenta && precioVenta > 0
           ? ((precioVenta - costoTotal) / precioVenta) * 100
           : null;
-
+		  
+	  const porcentajeConsumido =
+      porcentajeConsumidoRaw !== null
+        ? Number(porcentajeConsumidoRaw.toFixed(2))
+        : null;
+		
+	  const margenPorcentaje =
+      margenPorcentajeRaw !== null
+        ? Number(margenPorcentajeRaw.toFixed(2))
+        : null;
+		
+	  const tieneSobreconsumo = costoTotal > presupuesto;
+      const tieneMargenNegativo = margen !== null ? margen < 0 : false;
+	  
+	  let estadoFinanciero = 'SALUDABLE';
+	  
+	  if (!precioVenta || precioVenta <= 0) {
+      estadoFinanciero = 'SIN_PRECIO_VENTA';
+      } else if (tieneSobreconsumo) {
+      estadoFinanciero = 'SOBRECONSUMO';
+      } else if (
+      porcentajeConsumido !== null &&
+      porcentajeConsumido >= 80 &&
+      porcentajeConsumido <= 100
+      ) {
+      estadoFinanciero = 'EN_RIESGO';
+      }
+		
       return {
-        proyectoId: proyecto.id,
+      proyectoId: proyecto.id,
+      finanzas: {
         presupuesto,
         precioVenta,
         costoTotal,
         saldoDisponible,
+      },
+      rendimiento: {
         porcentajeConsumido,
         margen,
         margenPorcentaje,
-      };
+      },
+      estado: {
+        estadoFinanciero,
+        tieneSobreconsumo,
+        tieneMargenNegativo,
+      },
+    };
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
