@@ -23,7 +23,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException ? exception.getResponse() : null;
 
     let message: string | string[] = 'Error interno del servidor';
-    let error = 'Internal Server Error';
+    let error = this.getErrorName(status);
 
     if (typeof exceptionResponse === 'string') {
       message = exceptionResponse;
@@ -34,7 +34,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     ) {
       const responseObj = exceptionResponse as any;
       message = responseObj.message;
-      error = responseObj.error || error;
+      error = responseObj.error || this.getErrorName(status);
     }
 
     response.status(status).json({
@@ -45,5 +45,24 @@ export class HttpExceptionFilter implements ExceptionFilter {
       path: request.url,
       timestamp: new Date().toISOString(),
     });
+  }
+
+  private getErrorName(status: number): string {
+    switch (status) {
+      case 400:
+        return 'Bad Request';
+      case 401:
+        return 'Unauthorized';
+      case 403:
+        return 'Forbidden';
+      case 404:
+        return 'Not Found';
+      case 409:
+        return 'Conflict';
+      case 500:
+        return 'Internal Server Error';
+      default:
+        return 'Error';
+    }
   }
 }

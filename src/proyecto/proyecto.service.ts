@@ -24,6 +24,17 @@ export class ProyectoService {
 
     return proyecto;
   }
+  
+  private async calcularCostoTotal(proyectoId: number): Promise<number> {
+    const resultado = await this.prisma.compra.aggregate({
+      where: { proyectoId },
+      _sum: {
+        monto: true,
+      },
+    });
+
+    return resultado._sum.monto || 0;
+  }
 
   async crearProyecto(data: {
     nombre: string;
@@ -113,65 +124,39 @@ export class ProyectoService {
     }
   }
   
-   async obtenerMargen(proyectoId: number) {
-
+  async obtenerMargen(proyectoId: number) {
     try {
+      const proyecto = await this.buscarProyectoPorId(proyectoId);
+      const costoTotal = await this.calcularCostoTotal(proyectoId);
+      const precioVenta = proyecto.precioVenta || 0;
 
-     const proyecto = await this.prisma.proyecto.findUnique({
-      where: { id: proyectoId },
-    });
+      return {
+        proyectoId,
+        costoTotal,
+        precioVenta,
+        margen: precioVenta - costoTotal,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
-    if (!proyecto) {
       throw new HttpException(
-        'Proyecto no encontrado',
-        HttpStatus.NOT_FOUND,
+        'Error al calcular margen',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
-    const resultado = await this.prisma.compra.aggregate({
-      where: { proyectoId },
-      _sum: {
-        monto: true,
-      },
-    });
-
-    const costoTotal = resultado._sum.monto || 0;
-    const precioVenta = proyecto.precioVenta || 0;
-
-    return {
-      proyectoId,
-      costoTotal,
-      precioVenta,
-      margen: precioVenta - costoTotal,
-    };
-
-  } catch (error) {
-
-    if (error instanceof HttpException) {
-      throw error;
-    }
-
-    throw new HttpException(
-      'Error al calcular margen',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
-
   }
 
-}
 
+
+   
+   
    async obtenerResumenProyecto(proyectoId: number) {
     try {
       const proyecto = await this.buscarProyectoPorId(proyectoId);
 
-      const resultado = await this.prisma.compra.aggregate({
-        where: { proyectoId },
-        _sum: {
-          monto: true,
-        },
-      });
-
-      const costoTotal = resultado._sum.monto || 0;
+      const costoTotal = await this.calcularCostoTotal(proyectoId);
       const presupuesto = proyecto.presupuesto ?? 0;
       const precioVenta = proyecto.precioVenta ?? null;
 
