@@ -50,7 +50,7 @@ export class CompraService {
         );
       }
 
-      // Regla: monto siempre positivo
+      // Regla: normalizar monto y validar que sea mayor a 0
       const montoNormalizado = Math.abs(data.monto);
 
       if (!data.monto || montoNormalizado === 0) {
